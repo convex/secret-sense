@@ -27,5 +27,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test"
+  },
+  "devDependencies": {
+    "@changesets/cli": "3.0.3"
   }
 }
