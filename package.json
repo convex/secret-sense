@@ -1,0 +1,31 @@
+{
+  "name": "secret-sense",
+  "version": "0.0.0",
+  "description": "Guess whether a string is a secret (API key, token, credential) or plain configuration",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/convex/secret-sense.git"
+  },
+  "homepage": "https://github.com/convex/secret-sense#readme",
+  "bugs": "https://github.com/convex/secret-sense/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@12.18.0",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test"
+  }
+}
