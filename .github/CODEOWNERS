@@ -1,0 +1,3 @@
+# Requests a review from the maintainer on every PR, including the release PRs
+# that the version workflow opens.
+* @Nicolapps
