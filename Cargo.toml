@@ -10,3 +10,14 @@ readme = "README.md"
 include = ["/Cargo.toml", "/LICENSE", "/README.md", "/src/**/*.rs"]
 
 [workspace]
+# `wasm` holds the WebAssembly bindings for the npm package. It isn't published
+# to crates.io, so the crate itself never depends on wasm-bindgen.
+members = ["wasm"]
+
+[profile.release]
+# Only applies when building in this workspace (the npm package's WebAssembly);
+# crates.io dependents use their own profiles.
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"

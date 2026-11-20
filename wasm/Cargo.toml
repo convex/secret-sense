@@ -1,0 +1,16 @@
+[package]
+name = "secret-sense-wasm"
+version = "0.0.0"
+edition = "2024"
+description = "WebAssembly bindings for the secret-sense npm package"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+secret-sense = { path = ".." }
+# The wasm-bindgen CLI that `scripts/build.mjs` runs must be this exact
+# version: the build reads it from Cargo.lock and checks.
+wasm-bindgen = "=0.2.130"
