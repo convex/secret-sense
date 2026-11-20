@@ -1,0 +1,7 @@
+# Pinned so that the published WebAssembly is reproducible. The crate itself
+# supports the `rust-version` in Cargo.toml.
+[toolchain]
+channel = "1.99.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
