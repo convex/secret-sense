@@ -25,3 +25,23 @@ pnpm install
 pnpm build
 pnpm test
 ```
+
+## Releases
+
+The crate and the npm package share a version and a `v<version>` tag.
+
+Include a changeset with changes that need a release:
+
+```sh
+pnpm changeset
+```
+
+Choose the version bump, describe the user-visible change, and commit the
+generated file with your implementation. Docs-only and development-tooling
+changes do not need a changeset.
+
+On `main`, the [Update release PR workflow](./.github/workflows/version.yml)
+opens a release PR that bumps `package.json` and writes `CHANGELOG.md`.
+Changesets doesn't know about `Cargo.toml`, so the workflow then runs
+`scripts/sync-version.mjs` on the release PR's branch, pushes the result, and
+starts CI on it (pushes made by workflows don't trigger CI on their own).

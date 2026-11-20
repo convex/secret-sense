@@ -1,0 +1,85 @@
+# Opens the release PR when Changesets are pending, and tags the commit that
+# sets a new version, which starts the release workflow. See CONTRIBUTING.md.
+name: Update release PR
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  version:
+    name: Update release PR
+    if: github.repository_owner == 'convex' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write # start CI on the release PR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      # Installs the pnpm version from package.json's `packageManager`.
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - id: version-pr
+        uses: convex/npm-release-actions/version-pr@3a142e21f421319890981579b8952267bc11fc53 # v0.3.0
+        with:
+          # The sync updates package-lock.json, which pnpm doesn't use.
+          # pnpm-lock.yaml doesn't record the package's own version.
+          sync-lockfile: "false"
+      # Changesets only bumps package.json, so bring Cargo.toml and Cargo.lock
+      # along on the release PR's branch. Pushes and PRs made with the
+      # workflow token don't trigger workflows, so start CI on the branch too:
+      # its runs report the release PR's required checks.
+      - name: Sync the crate version on the release PR
+        if: steps.version-pr.outputs.pr-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: changeset-release/main
+        run: |
+          git fetch --no-tags origin "$BRANCH"
+          git checkout --force -B "$BRANCH" FETCH_HEAD
+          node scripts/sync-version.mjs
+          if ! git diff --quiet; then
+            git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit --all --message "Sync the crate version"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
+          fi
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+  tag:
+    name: Tag a new version
+    if: github.repository_owner == 'convex' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # create the version tag
+      actions: write # start Release on the new tag
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: version
+        run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+      # 0.0.0 is the unreleased placeholder: the first release comes from a
+      # changeset.
+      - if: steps.version.outputs.version != '0.0.0'
+        uses: convex/npm-release-actions/tag-version@3a142e21f421319890981579b8952267bc11fc53 # v0.3.0

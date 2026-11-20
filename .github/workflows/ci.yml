@@ -90,9 +90,10 @@ jobs:
         run: node scripts/sync-version.mjs --check
       - run: pnpm install --frozen-lockfile
       - name: Check the release notes when the version changes
-        if: github.event_name == 'pull_request' || github.event_name == 'push'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          # Runs started by hand or by the version workflow (on the release
+          # PR's branch) compare against main.
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
         run: |
           version=$(jq -r .version package.json)
           previous=$(git show "$BASE_SHA:package.json" | jq -r .version)
