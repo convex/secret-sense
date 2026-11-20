@@ -45,3 +45,41 @@ opens a release PR that bumps `package.json` and writes `CHANGELOG.md`.
 Changesets doesn't know about `Cargo.toml`, so the workflow then runs
 `scripts/sync-version.mjs` on the release PR's branch, pushes the result, and
 starts CI on it (pushes made by workflows don't trigger CI on their own).
+
+When the release PR merges, CI tags the commit that set the new version as
+`v<version>` and starts the [Release workflow](./.github/workflows/release.yml)
+on that tag. To release a different commit, tag it yourself:
+
+```sh
+git tag v1.2.3 <commit> && git push origin v1.2.3
+```
+
+The tag must match the version. Stable releases must be on `main`. The
+workflow builds and tests the tagged commit, stages the npm package, and then
+publishes the crate to crates.io.
+
+Review the npm package on npm's **Staged Packages** page and approve it with
+2FA, or run:
+
+```sh
+npm stage approve <stage-id>
+```
+
+## Repository setup
+
+Publishing uses trusted publishing (OIDC) on both registries, so the
+repository stores no registry tokens. It needs:
+
+- Two GitHub environments that only allow tags matching `v*`: `release-npm`
+  for the npm job and `release-rust` for the crates.io job. Optionally, add
+  required reviewers to `release-rust` to approve each crates.io publish (npm
+  releases already wait for approval on npm).
+- A [trusted publisher](https://crates.io/docs/trusted-publishing) for
+  `secret-sense` on crates.io: repository `convex/secret-sense`, workflow
+  `release.yml`, environment `release-rust`.
+- A [trusted publisher](https://docs.npmjs.com/trusted-publishers) for
+  `secret-sense` on npm: repository `convex/secret-sense`, workflow
+  `release.yml`, environment `release-npm`.
+
+Both registries only let you add a trusted publisher to a package that exists,
+so the first version of each is published by hand.
