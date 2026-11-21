@@ -40,6 +40,11 @@ Choose the version bump, describe the user-visible change, and commit the
 generated file with your implementation. Docs-only and development-tooling
 changes do not need a changeset.
 
+Releases are currently alphas: Changesets is in prerelease mode
+(`.changeset/pre.json`), so versions look like `0.1.0-alpha.0` and are
+published under npm's `alpha` dist-tag. Before the first stable release, run
+`pnpm changeset pre exit` and commit the result.
+
 On `main`, the [Update release PR workflow](./.github/workflows/version.yml)
 opens a release PR that bumps `package.json` and writes `CHANGELOG.md`.
 Changesets doesn't know about `Cargo.toml`, so the workflow then runs
