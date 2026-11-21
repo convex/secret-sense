@@ -42,3 +42,30 @@ jobs:
           cargo package --locked --package secret-sense
           cargo package --locked --package secret-sense --list
 
+  npm:
+    name: npm package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Installs the pnpm version from package.json's `packageManager`.
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      # `cargo install` skips the build when the cache already has this version.
+      - name: Install wasm-bindgen
+        run: cargo install --locked wasm-bindgen-cli --version "$(node scripts/build.mjs --print-wasm-bindgen-version)"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+      - name: Check the published package
+        run: npm pack --dry-run
+
