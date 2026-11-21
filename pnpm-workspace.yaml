@@ -1,0 +1,8 @@
+# Holds back dependency versions released within the last 7 days (10080
+# minutes). If necessary (e.g. to install an urgent security fix), override
+# this with `pnpm add <package>@<version> --config.minimumReleaseAge=0`.
+minimumReleaseAge: 10080
+
+# pnpm fails the install on any dependency build script that isn't listed here,
+# so new ones must be reviewed. No dependency needs one today.
+allowBuilds: {}
