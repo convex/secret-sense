@@ -101,6 +101,9 @@ jobs:
       - run: rustup toolchain install
       - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
         id: auth
-      - run: cargo publish --locked --package secret-sense
+      # The build job already built and tested this commit's package with
+      # `cargo package`. Skipping the rebuild here means no build scripts or
+      # proc macros run while the crates.io token is in the environment.
+      - run: cargo publish --locked --no-verify --package secret-sense
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
