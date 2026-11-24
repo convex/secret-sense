@@ -39,6 +39,12 @@
         "major"
       ],
       "automerge": false
+    },
+    {
+      "description": "changelog-github's template option is experimental. Review its updates by hand.",
+      "matchPackageNames": ["@changesets/changelog-github"],
+      "groupName": "Changesets changelog",
+      "automerge": false
     }
   ]
 }
