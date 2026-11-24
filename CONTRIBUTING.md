@@ -40,6 +40,9 @@ Choose the version bump, describe the user-visible change, and commit the
 generated file with your implementation. Docs-only and development-tooling
 changes do not need a changeset.
 
+Once your PR is open, add its number in parentheses at the end of the first
+paragraph of each changeset, for example `(#279)`.
+
 On `main`, the [Update release PR workflow](./.github/workflows/version.yml)
 opens a release PR that bumps `package.json` and writes `CHANGELOG.md`.
 Changesets doesn't know about `Cargo.toml`, so the workflow then runs
